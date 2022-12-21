@@ -1,3 +1,8 @@
+using ControleDeDespesas.Controllers;
+using ControleDeDespesas.DTOs;
+using ControleDespesas.Models;
+using FluentValidation;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +11,10 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddValidatorsFromAssemblyContaining<PersonsController>();
+builder.Services.AddAutoMapper(typeof(PersonsController).Assembly);
+
 
 var app = builder.Build();
 

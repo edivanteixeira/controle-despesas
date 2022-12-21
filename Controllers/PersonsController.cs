@@ -1,10 +1,15 @@
+using System.ComponentModel.DataAnnotations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ControleDeDespesas.DTOs;
 using ControleDeDespesas.Models;
+using ControleDespesas.DTOs;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using ControleDespesas.Helpers;
+using AutoMapper;
 
 namespace ControleDeDespesas.Controllers
 {
@@ -12,6 +17,13 @@ namespace ControleDeDespesas.Controllers
     [Route("[controller]")]
     public class PersonsController : ControllerBase
     {
+        private readonly IValidator<PersonCreate> _validator;
+        private readonly IMapper _mapper;
+        public PersonsController(IValidator<PersonCreate> validator, IMapper mapper)
+        {
+            _validator = validator;
+            _mapper = mapper;
+        }
 
 
         [HttpGet]
@@ -34,18 +46,23 @@ namespace ControleDeDespesas.Controllers
 
 
         [HttpPost]
-        public Task<Person> Create(PersonCreate personCreate)
+        public IActionResult Create(PersonCreate personCreate)
         {
-            // Validar com fluentvalidator
-            // https://docs.fluentvalidation.net/en/latest/ 
 
-            var newPerson = new Person();
-            
-            // Automapper
-            newPerson.Name = personCreate.Name;
+            var result = _validator.Validate(personCreate);
 
-        
-            return Task.FromResult(newPerson);
+            var errorResponse = result.ToErrorResponse();
+
+            if (errorResponse != null)
+            {
+                return BadRequest(errorResponse);
+            }
+
+
+            var newPerson = _mapper.Map<Person>(personCreate);
+
+            return Ok(newPerson);
+
         }
 
         [HttpGet]
